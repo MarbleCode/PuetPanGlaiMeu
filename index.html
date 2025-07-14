@@ -499,7 +499,7 @@
         async function initializeFirebase() {
             try {
                 app = initializeApp(firebaseConfig);
-                const analytics = getAnalytics(app);
+                
                 db = getFirestore(app);
                 auth = getAuth(app);
 
