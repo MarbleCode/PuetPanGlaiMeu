@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile App UI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app container */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 2rem; /* More rounded corners for the phone frame */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 375px; /* Typical mobile width */
+            height: 667px; /* Typical mobile height */
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Styles for individual screens */
+        .screen {
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            padding: 1.5rem;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .screen.active {
+            display: flex; /* Show active screen */
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .header-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: 50%;
+            background-color: #4CAF50; /* Green icon background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        /* Style for the image icon */
+        .header-icon img, .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .input-label {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        .menu-item, .sales-channel-item, .data-input-item, .plant-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            background-color: #f9f9f9;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .menu-item:hover, .sales-channel-item:hover, .data-input-item:hover, .plant-item:hover {
+            background-color: #f0f0f0;
+        }
+        .item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .item-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem;
+            background-color: #f0f2f5;
+            border-top: 1px solid #eee;
+        }
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .nav-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        .plant-item input[type="radio"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+        }
+        /* Adjusted height for scrollable content in plant selection screen */
+        #screen_plant_selection .flex-grow {
+            max-height: calc(100% - 10rem); /* Adjust as needed to leave space for header and button */
+            overflow-y: auto;
+        }
+
+        /* Custom Modal for messages */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Screen 0: ล็อกอินหรือสมัครใช้งาน (Login or Register) -->
+        <div id="screen0" class="screen active">
+            <div class="flex flex-col items-center justify-center h-full">
+                <div class="login-logo">
+                    <!-- Image of App Icon -->
+                    <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="App Icon">
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Login</h2>
+
+                <input type="text" id="loginUsername" placeholder="Username / Email" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg mb-6">
+
+                <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors mb-4" onclick="showScreen('screen_plant_selection')">Login</button>
+                <button class="w-full bg-gray-300 text-gray-800 p-3 rounded-xl font-semibold shadow-md hover:bg-gray-400 transition-colors" onclick="showScreen('screen_data_input')">Register</button>
+            </div>
+        </div>
+
+        <!-- Screen: กรอกข้อมูลพืช (Data Input) -->
+        <div id="screen_data_input" class="screen">
+            <div class="flex flex-col">
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">กรอกข้อมูลพืช</h2>
+                </div>
+
+                
+
+                <div class="flex-grow overflow-y-auto">
+                    <input type="text" id="plantName" placeholder="ชื่อพืช" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantVariety" placeholder="ชื่อพันธุ์" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantQuantity" placeholder="จำนวนกี่ต้น" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantDatePlanted" placeholder="วันเริ่มปลูก" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantDateHarvest" placeholder="วันเก็บเกี่ยว" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantLocation" placeholder="สถานที่ปลูก" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                    <input type="text" id="plantContact" placeholder="ติดต่อ" class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                </div>
+            </div>
+            <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors" onclick="savePlantData()">บันทึก</button>
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+                <button class="nav-button" onclick="showScreen('screen4')">ช่องทางจำหน่าย</button>
+            </div>
+        </div>
+
+        <!-- Screen: เลือกพืชของคุณ (Plant Selection) -->
+        <div id="screen_plant_selection" class="screen">
+            <div class="flex flex-col h-full"> <!-- Ensure screen itself takes full height -->
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">เลือกพืชของคุณ</h2>
+                </div>
+
+                <!-- Scrollable content area for plant items -->
+                <div id="plantList" class="flex-grow overflow-y-auto pb-4">
+                    <!-- Plant items will be loaded here from Firestore -->
+                    <p class="text-gray-500 text-center py-4">กำลังโหลดข้อมูลพืช...</p>
+                </div>
+                <!-- SAVE button fixed at the bottom -->
+                <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors mt-4" onclick="showScreen('screen1')">SAVE</button>
+                <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+                <button class="nav-button" onclick="showScreen('screen4')">ช่องทางจำหน่าย</button>
+            </div>
+            </div>
+        </div>
+
+        <!-- Screen 1: ตั้งวันเวลาที่จะแจ้งเตือน (Set Notification Date) -->
+        <div id="screen1" class="screen">
+            <div class="flex flex-col">
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">ตั้งวันเวลาที่จะแจ้งเตือน</h2>
+                </div>
+
+                <div class="mb-6">
+                    <label class="input-label">วัน / เดือน / ปี ที่เริ่มปลูก</label>
+                    <div class="input-group">
+                        <input type="text" id="notiDay" placeholder="7" class="w-1/3">
+                        <span>/</span>
+                        <input type="text" id="notiMonth" placeholder="8" class="w-1/3">
+                        <span>/</span>
+                        <input type="text" id="notiYear" placeholder="2568" class="w-1/3">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="input-label">พืชที่ต้องการขาย</label>
+                    <input type="text" id="plantToSell" placeholder="พืชที่ต้องการขาย" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
+                </div>
+
+                <div class="mb-6">
+                    <label class="input-label">ขนาดกี่ไร่ กี่งาน กี่ตารางวา</label>
+                    <div class="input-group">
+                        <input type="text" id="quantity1" placeholder="4" class="w-1/2">
+                        <span>/</span>
+                        <input type="text" id="quantity2" placeholder="1" class="w-1/2">
+                        <span>/</span>
+                        <input type="text" id="quantity3" placeholder="28" class="w-1/2">
+                    </div>
+                </div>
+            </div>
+            <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors" onclick="saveNotificationData()">SAVE</button>
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+                <button class="nav-button" onclick="showScreen('screen4')">ช่องทางจำหน่าย</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: ตั้งเวลาที่แจ้งเตือน (Set Notification Time) -->
+        <div id="screen2" class="screen">
+            <div class="flex flex-col">
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">ตั้งเวลาที่แจ้งเตือนรดน้ำ</h2>
+                </div>
+
+                <div class="mb-6">
+                    <label class="input-label">ครั้งที่ 1</label>
+                    <div class="input-group">
+                        <input type="text" id="time1Hour" placeholder="07" class="w-1/3">
+                        <span>/</span>
+                        <input type="text" id="time1Minute" placeholder="00" class="w-1/3">
+                        <span>น.</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="input-label">ครั้งที่ 2</label>
+                    <div class="input-group">
+                        <input type="text" id="time2Hour" placeholder="17" class="w-1/3">
+                        <span>/</span>
+                        <input type="text" id="time2Minute" placeholder="00" class="w-1/3">
+                        <span>น.</span>
+                    </div>
+                </div>
+            </div>
+            <button class="w-full bg-blue-500 text-white p-3 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors" onclick="showScreen('screen3')">SAVE</button>
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+                <button class="nav-button" onclick="showScreen('screen4')">ช่องทางจำหน่าย</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: เมนู (Menu) -->
+        <div id="screen3" class="screen">
+            <div class="flex flex-col">
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">เมนู</h2>
+                </div>
+
+                <div class="flex-grow">
+                    <div class="menu-item" onclick="">
+                        <div class="item-icon bg-gray-600">⚙️</div>
+                        <span class="item-text">ตั้งค่าการแจ้งเตือน</span>
+                    </div>
+                    <div class="menu-item" onclick="">
+                        <div class="item-icon bg-blue-500">💧</div>
+                        <span class="item-text">การรดน้ำและบำรุงดิน</span>
+                    </div>
+                    <div class="menu-item" onclick="">
+                        <div class="item-icon bg-orange-500">🌱</div>
+                        <span class="item-text">การปลูกพืชและบำรุงรักษา</span>
+                    </div>
+                    <div class="menu-item" onclick="">
+                        <div class="item-icon bg-green-600">☀️</div>
+                        <span class="item-text">วันเก็บเกี่ยวและวิธีเก็บ</span>
+                    </div>
+                    <div class="menu-item" onclick="">
+                        <div class="item-icon bg-purple-500">🧺</div>
+                        <span class="item-text">ปุ๋ยบำรุงพืช</span>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+                <button class="nav-button" onclick="showScreen('screen4')">ช่องทางจำหน่าย</button>
+            </div>
+        </div>
+
+        <!-- Screen 4: ช่องทางการจำหน่าย (Sales Channels) -->
+        <div id="screen4" class="screen">
+            <div class="flex flex-col">
+                <div class="header">
+                    <div class="header-icon bg-green-500">
+                        <!-- Image of Header Icon -->
+                        <img src="https://img2.pic.in.th/pic/076645c34aa0958165dd33a4cf9e32bd.png" alt="Header Icon">
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">ราคาที่แนะนำในการจำหน่าย</h2>
+                </div>
+
+                <div class="flex-grow">
+                    <div class="sales-channel-item" onclick="showSalesRecommendation('market')">
+                        <div class="item-icon bg-red-500">🛒</div>
+                        <span class="item-text">ตลาดสินค้า</span>
+                    </div>
+                    <div class="sales-channel-item" onclick="showSalesRecommendation('community')">
+                        <div class="item-icon bg-yellow-500">🏘️</div>
+                        <span class="item-text">ตลาดชุมชน</span>
+                    </div>
+                    <div class="sales-channel-item" onclick="showSalesRecommendation('online')">
+                        <div class="item-icon bg-orange-500">📦</div>
+                        <span class="item-text">จำหน่ายออนไลน์</span>
+                    </div>
+                    <div class="sales-channel-item" onclick="">
+                        <div class="item-icon bg-blue-500">🤝</div>
+                        <span class="item-text">ไม่ประสงค์จำหน่าย</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Added SAVE button and updated navigation buttons -->
+            
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="showScreen('screen3')">เมนูกลับ</button>
+                <button class="nav-button" onclick="showScreen('screen0')">ล็อกอิน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for messages -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <p id="modalMessage"></p>
+            <button onclick="closeModal()">ตกลง</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables
+        let app;
+        let db;
+        let auth;
+        let userId = 'anonymous'; // Default to anonymous
+
+        // Get app ID and Firebase config from the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         * Sets up real-time listener for plant data.
+         */
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Authenticated with user ID:", userId);
+                        // Display userId on UI (e.g., in a specific div)
+                        const userIdDisplay = document.getElementById('userIdDisplay');
+                        if (userIdDisplay) {
+                            userIdDisplay.textContent = `User ID: ${userId}`;
+                        }
+                        // Load plant data after authentication
+                        loadPlantData();
+                    } else {
+                        // Sign in anonymously if no user is found
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                console.log("Signed in with custom token.");
+                            } else {
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously.");
+                            }
+                        } catch (error) {
+                            console.error("Firebase authentication error:", error);
+                            showMessage('ข้อผิดพลาดในการตรวจสอบสิทธิ์ Firebase: ' + error.message);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showMessage('ข้อผิดพลาดในการเริ่มต้น Firebase: ' + error.message);
+            }
+        }
+
+        /**
+         * Shows a specific screen and hides others.
+         * @param {string} screenId - The ID of the screen to show.
+         */
+        window.showScreen = function(screenId) {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        /**
+         * Displays a custom modal message.
+         * @param {string} message - The message to display.
+         */
+        function showMessage(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        /**
+         * Closes the custom modal message.
+         */
+        window.closeModal = function() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        /**
+         * Saves plant data to Firestore.
+         */
+        window.savePlantData = async function() {
+            if (!db || !userId) {
+                showMessage('Firebase ยังไม่พร้อมใช้งาน โปรดลองอีกครั้ง');
+                return;
+            }
+
+            const plantName = document.getElementById('plantName').value;
+            const plantVariety = document.getElementById('plantVariety').value;
+            const plantQuantity = document.getElementById('plantQuantity').value;
+            const plantDatePlanted = document.getElementById('plantDatePlanted').value;
+            const plantDateHarvest = document.getElementById('plantDateHarvest').value;
+            const plantLocation = document.getElementById('plantLocation').value;
+            const plantContact = document.getElementById('plantContact').value;
+
+            if (!plantName || !plantQuantity) {
+                showMessage('โปรดกรอกชื่อพืชและจำนวน');
+                return;
+            }
+
+            try {
+                const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${userId}/plant_data`), {
+                    name: plantName,
+                    variety: plantVariety,
+                    quantity: plantQuantity,
+                    datePlanted: plantDatePlanted,
+                    dateHarvest: plantDateHarvest,
+                    location: plantLocation,
+                    contact: plantContact,
+                    timestamp: new Date()
+                });
+                showMessage('บันทึกข้อมูลพืชเรียบร้อยแล้ว!');
+                console.log("Document written with ID: ", docRef.id);
+                // Clear form fields
+                document.getElementById('plantName').value = '';
+                document.getElementById('plantVariety').value = '';
+                document.getElementById('plantQuantity').value = '';
+                document.getElementById('plantDatePlanted').value = '';
+                document.getElementById('plantDateHarvest').value = '';
+                document.getElementById('plantLocation').value = '';
+                document.getElementById('plantContact').value = '';
+
+                // Navigate to plant selection screen after saving
+                showScreen('screen_plant_selection');
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage('ข้อผิดพลาดในการบันทึกข้อมูลพืช: ' + e.message);
+            }
+        }
+
+        /**
+         * Loads plant data from Firestore and displays it.
+         */
+        function loadPlantData() {
+            if (!db || !userId) {
+                console.log('Firebase หรือ User ID ยังไม่พร้อมสำหรับการโหลดข้อมูลพืช');
+                return;
+            }
+
+            const plantListDiv = document.getElementById('plantList');
+            plantListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">กำลังโหลดข้อมูลพืช...</p>'; // Show loading message
+
+            const q = query(collection(db, `artifacts/${appId}/users/${userId}/plant_data`));
+
+            onSnapshot(q, (querySnapshot) => {
+                plantListDiv.innerHTML = ''; // Clear previous list
+                if (querySnapshot.empty) {
+                    plantListDiv.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีข้อมูลพืช</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const plant = doc.data();
+                    const plantItem = document.createElement('div');
+                    plantItem.className = 'plant-item';
+                    plantItem.innerHTML = `
+                        <input type="radio" name="selectedPlant" id="plant-${doc.id}" value="${doc.id}">
+                        <label for="plant-${doc.id}" class="item-text">${plant.name} (${plant.variety || 'ไม่ระบุ'})</label>
+                    `;
+                    plantListDiv.appendChild(plantItem);
+                });
+            }, (error) => {
+                console.error("Error listening to plant data: ", error);
+                plantListDiv.innerHTML = `<p class="text-red-500 text-center py-4">ข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
+            });
+        }
+
+        /**
+         * Saves notification date data to Firestore.
+         */
+        window.saveNotificationData = async function() {
+            if (!db || !userId) {
+                showMessage('Firebase ยังไม่พร้อมใช้งาน โปรดลองอีกครั้ง');
+                return;
+            }
+
+            const notiDay = document.getElementById('notiDay').value;
+            const notiMonth = document.getElementById('notiMonth').value;
+            const notiYear = document.getElementById('notiYear').value;
+            const plantToSell = document.getElementById('plantToSell').value;
+            const quantity1 = document.getElementById('quantity1').value;
+            const quantity2 = document.getElementById('quantity2').value;
+            const quantity3 = document.getElementById('quantity3').value;
+
+            if (!notiDay || !notiMonth || !notiYear) {
+                showMessage('โปรดกรอกวันที่แจ้งเตือนให้ครบถ้วน');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/notification_data`), {
+                    day: notiDay,
+                    month: notiMonth,
+                    year: notiYear,
+                    plantToSell: plantToSell,
+                    quantity: `${quantity1}/${quantity2}/${quantity3}`,
+                    timestamp: new Date()
+                });
+                showMessage('บันทึกข้อมูลการแจ้งเตือนเรียบร้อยแล้ว!');
+                showScreen('screen2'); // Move to the next screen after saving
+            } catch (e) {
+                console.error("Error adding notification data: ", e);
+                showMessage('ข้อผิดพลาดในการบันทึกข้อมูลการแจ้งเตือน: ' + e.message);
+            }
+        }
+
+        /**
+         * Saves sales channel data to Firestore.
+         * Note: This function is currently a placeholder for saving the selected channel.
+         * The actual selection logic would need to be implemented if multiple channels can be selected.
+         */
+        window.saveSalesChannelData = async function() {
+            if (!db || !userId) {
+                showMessage('Firebase ยังไม่พร้อมใช้งาน โปรดลองอีกครั้ง');
+                return;
+            }
+
+            // In a real app, you would get the selected sales channel here
+            // For this example, we'll just save a placeholder
+            const selectedChannel = "ไม่ระบุช่องทาง"; // Placeholder
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/sales_channels`), {
+                    channel: selectedChannel,
+                    timestamp: new Date()
+                });
+                showMessage('บันทึกช่องทางการจำหน่ายเรียบร้อยแล้ว!');
+                showScreen('screen0'); // Go back to login screen or a confirmation screen
+            } catch (e) {
+                console.error("Error adding sales channel data: ", e);
+                showMessage('ข้อผิดพลาดในการบันทึกช่องทางการจำหน่าย: ' + e.message);
+            }
+        }
+
+        /**
+         * Displays sales recommendation based on the selected channel.
+         * @param {string} channelType - The type of sales channel (e.g., 'market', 'community', 'online').
+         */
+        window.showSalesRecommendation = function(channelType) {
+            let message = '';
+            switch (channelType) {
+                case 'market':
+                    message = 'ตลาดสินค้า: แนะนำราคาขายส่ง ฿15-20/กก. ราคาขายปลีก ฿25-35/กก. เน้นคุณภาพและปริมาณ';
+                    break;
+                case 'community':
+                    message = 'ตลาดชุมชน: แนะนำราคาขาย ฿20-30/กก. เน้นสินค้าสดใหม่และสร้างความสัมพันธ์กับลูกค้า';
+                    break;
+                case 'online':
+                    message = 'จำหน่ายออนไลน์: แนะนำราคา ฿30-50/กก. (รวมค่าส่ง) เน้นการสร้างแบรนด์และภาพลักษณ์สินค้าที่ดี';
+                    break;
+                default:
+                    message = 'ไม่มีข้อมูลแนะนำสำหรับช่องทางนี้';
+            }
+            showMessage(message);
+        }
+
+        // Initial screen to show when the app loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFirebase(); // Initialize Firebase when the DOM is ready
+            showScreen('screen0'); // Start with the login/register screen
+        });
+    </script>
+</body>
+</html>
